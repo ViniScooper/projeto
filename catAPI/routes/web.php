@@ -18,9 +18,9 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 // Processar o login (recebe os dados do formulário)
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-// Rota principal (home) direcionando para a página de registro
+// Rota principal (home) direcionando para a página de login
 Route::get('/', function () {
-    return view('auth.register');
+    return view('auth.login');
 });
 
 // Rota para a página de cats
@@ -35,8 +35,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/favorites', [CatController::class, 'getFavorites'])->name('api.favorites');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/logout', function () {
-        Auth::logout();
-        return redirect('/login');
-    })->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

@@ -21,7 +21,9 @@ class ProfileController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'cpf' => 'required|string|max:14|unique:usuarios,cpf,'.$user->id,
             'email' => 'required|email|unique:usuarios,email,'.$user->id,
+            'phone' => 'required|string|max:15',
             'password' => ['nullable', 'confirmed', Rules\Password::min(8)
                 ->letters()
                 ->mixedCase()
@@ -31,7 +33,9 @@ class ProfileController extends Controller
         ]);
 
         $user->name = $request->name;
+        $user->cpf = $request->cpf;
         $user->email = $request->email;
+        $user->phone = $request->phone;
 
         if ($request->password) {
             $user->password = Hash::make($request->password);

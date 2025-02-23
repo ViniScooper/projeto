@@ -133,9 +133,25 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" name="cpf" value="{{ old('cpf', $user->cpf) }}" required>
+                        @error('cpf')
+                            <div class="error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required>
                         @error('email')
+                            <div class="error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Telefone</label>
+                        <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" required>
+                        @error('phone')
                             <div class="error">{{ $message }}</div>
                         @enderror
                     </div>

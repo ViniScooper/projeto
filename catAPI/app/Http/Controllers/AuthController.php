@@ -19,22 +19,22 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email:filter',
-            'password' => 'required'
+            'cpf' => ['required', 'string'],
+            'password' => ['required', 'string'],
         ]);
 
-        Log::info('Tentativa de login', ['email' => $credentials['email'], 'ip' => $request->ip()]);
+        Log::info('Tentativa de login', ['cpf' => $credentials['cpf'], 'ip' => $request->ip()]);
 
-        if (Auth::attempt($credentials, $request->remember)) {
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             Log::info('Login bem-sucedido', ['user_id' => Auth::id()]);
-            return redirect()->intended(route('cats'));
+            return redirect()->intended('/cats');
         }
 
-        Log::warning('Falha no login', ['email' => $credentials['email']]);
+        Log::warning('Falha no login', ['cpf' => $credentials['cpf']]);
         return back()->withErrors([
-            'email' => 'Credenciais inválidas ou conta não existe',
-        ])->withInput($request->only('email', 'remember'));
+            'cpf' => 'As credenciais fornecidas não correspondem aos nossos registros.',
+        ]);
     }
 
     public function logout(Request $request)
@@ -45,7 +45,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect()->route('home');
+        return redirect('/');
     }
 
     public function showRegister()
@@ -57,7 +57,9 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email:filter|unique:usuarios',
+            'cpf' => 'required|string|max:14|unique:usuarios',
+            'email' => 'required|string|email|max:255|unique:usuarios',
+            'phone' => 'required|string|max:15',
             'password' => [
                 'required',
                 'confirmed',
@@ -72,7 +74,9 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $request->name,
+            'cpf' => $request->cpf,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password)
         ]);
 
@@ -80,6 +84,6 @@ class AuthController extends Controller
         
         Log::info('Novo usuário registrado', ['user_id' => $user->id]);
         
-        return redirect()->route('cats')->with('success', 'Registro concluído com sucesso!');
+        return redirect()->route('login');
     }
 }

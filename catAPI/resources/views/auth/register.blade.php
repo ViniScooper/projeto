@@ -6,83 +6,121 @@
     <title>Registro</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            background-color: #f5f6fa;
+            font-family: Arial, sans-serif;
         }
-        .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 300px;
-        }
-        h2 {
-            color: #333;
-        }
-        input {
+        .register-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            max-width: 400px;
         }
-        button {
+        .register-container h2 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        .form-group input {
             width: 100%;
-            padding: 10px;
-            background-color: #007bff;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+        .btn:hover {
+            background-color: #2980b9;
         }
-        p {
-            margin-top: 15px;
+        .login-link {
+            margin-top: 1rem;
+            text-align: center;
         }
-        a {
-            color: #007bff;
+        .login-link a {
+            color: #3498db;
             text-decoration: none;
         }
-        a:hover {
+        .login-link a:hover {
             text-decoration: underline;
-        }
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Página de Registro</h2>
-        @if ($errors->any())
-            <div class="error">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    <div class="register-container">
+        <h2>Registro</h2>
         <form method="POST" action="{{ route('register.post') }}">
             @csrf
-            <input type="text" name="name" placeholder="Nome" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Senha" required>
-            <input type="password" name="password_confirmation" placeholder="Confirme a Senha" required>
-            <button type="submit">Registrar</button>
+            <div class="form-group">
+                <label for="name">Nome</label>
+                <input type="text" id="name" name="name" required>
+                @error('name')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" required>
+                @error('cpf')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                @error('email')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefone</label>
+                <input type="text" id="phone" name="phone" required>
+                @error('phone')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+                @error('password')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="password_confirmation">Confirme a Senha</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" required>
+            </div>
+            <button type="submit" class="btn">Registrar</button>
         </form>
-        <p>Já tem conta? <a href="{{ route('login') }}">Faça login</a></p>
+        <div class="login-link">
+            <p>Já tem uma conta? <a href="{{ route('login') }}">Faça login aqui</a></p>
+        </div>
     </div>
 </body>
 </html>
