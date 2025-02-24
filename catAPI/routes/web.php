@@ -18,16 +18,17 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 // Processar o login (recebe os dados do formulário)
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-// Rota principal (home) direcionando para a página de login
+// Rota principal (home) direcionando para a página de gatos
 Route::get('/', function () {
-    return view('auth.login');
+    return redirect()->route('cats');
 });
 
-// Rota para a página de cats
+// Rota para a página de gatos (acessível a todos)
 Route::get('/cats', function () {
     return view('cats'); // Certifique-se de que a view 'cats' exista
-})->name('cats')->middleware('auth');
+})->name('cats');
 
+// Rotas protegidas por autenticação
 Route::middleware('auth')->group(function () {
     Route::post('/favorite', [CatController::class, 'favorite'])->name('favorite');
     Route::delete('/favorite/{catId}', [CatController::class, 'deleteFavorite'])->name('favorite.delete');

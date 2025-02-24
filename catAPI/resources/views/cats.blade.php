@@ -171,15 +171,24 @@
     </div>
 
     <div style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px;">
-        <a href="{{ route('profile') }}" style="padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">
-            Acessar Perfil
-        </a>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                Sair
-            </button>
-        </form>
+        @auth
+            <a href="{{ route('profile') }}" style="padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">
+                Acessar Perfil
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Sair
+                </button>
+            </form>
+        @else
+            <a href="{{ route('login') }}" style="padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">
+                Login
+            </a>
+            <a href="{{ route('register') }}" style="padding: 10px 20px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px;">
+                Registrar
+            </a>
+        @endauth
     </div>
 
     <div class="controls">
@@ -190,15 +199,6 @@
 
     <div class="loading-spinner" id="loading"></div>
     <div class="cat-container" id="catContainer"></div>
-
-
-        <!-- 
-        <div class="favorites-section">
-            <h2>Gatos Favoritos</h2>
-            <div class="cat-container" id="favoritesContainer"></div>
-        </div>
-
- -->
 
     <script>
         const API_BASE = 'https://api.thecatapi.com/v1';
@@ -231,7 +231,7 @@
                     select.appendChild(option);
                 });
             } catch (error) {
-              //  showError('Erro ao carregar raças');
+                console.error('Erro ao carregar raças:', error);
             }
         }
 
@@ -252,7 +252,7 @@
                 console.log('Dados da API:', cats); // Para debug
                 displayCats(cats);
             } catch (error) {
-               // showError('Erro ao carregar gatos');
+                console.error('Erro ao carregar gatos:', error);
             } finally {
                 showLoading(false);
             }
@@ -294,33 +294,41 @@
             }).join('');
         }
 
-        async function toggleFavorite(catId, catUrl) {
-            try {
-                const response = await fetch('/favorite', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        cat_id: catId,
-                        cat_url: catUrl,
-                        _token: document.querySelector('meta[name="csrf-token"]').content
-                    })
-                });
 
-                const result = await response.json();
-                
-                if (result.status === 'added') {
-                    alert('Adicionado aos favoritos!');
-                    loadFavorites(); // Atualiza a lista de favoritos
-                } else if (result.status === 'removed') {
-                    alert('Removido dos favoritos!');
-                    loadFavorites(); // Atualiza a lista de favoritos
+
+
+        
+        async function toggleFavorite(catId, catUrl) {
+            @auth
+                try {
+                    const response = await fetch('/favorite', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': CSRF_TOKEN
+                        },
+                        body: JSON.stringify({
+                            cat_id: catId,
+                            cat_url: catUrl,
+                            _token: CSRF_TOKEN
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.status === 'added') {
+                        alert('Adicionado aos favoritos!');
+                        loadFavorites(); // Atualiza a lista de favoritos
+                    } else if (result.status === 'removed') {
+                        alert('Removido dos favoritos!');
+                        loadFavorites(); // Atualiza a lista de favoritos
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
                 }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
+            @else
+                alert('Você precisa fazer login para favoritar um gato.');
+            @endauth
         }
 
         async function loadFavorites() {
@@ -329,30 +337,18 @@
                 const favoritesData = await response.json();
                 console.log('Dados dos favoritos:', favoritesData); // Log de depuração
 
-                const container = document.getElementById('favoritesContainer');
-                container.innerHTML = favoritesData.map(fav => `
-                    <div class="cat-card">
-                        <img src="${fav.cat_url}" class="cat-image" alt="Gato favorito">
-                        <button class="favorite-btn" 
-                                onclick="toggleFavorite('${fav.cat_api_id}', '${fav.cat_url}')"
-                                data-cat-id="${fav.cat_api_id}">
-                            ❌ Remover
-                        </button>
-                    </div>
-                `).join('');
+                favorites = new Set(favoritesData.map(fav => fav.cat_api_id));
+                updateFavoriteButtons();
             } catch (error) {
-              //  console.error('Erro ao carregar favoritos:', error); // Log de depuração
-               // showError('Erro ao carregar favoritos');
+                console.error('Erro ao carregar favoritos:', error); // Log de depuração
             }
         }
 
         // Funções auxiliares
-        function updateFavoriteButtons(catId) {
-            document.querySelectorAll(`[data-cat-id="${catId}"]`).forEach(btn => {
+        function updateFavoriteButtons() {
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                const catId = btn.getAttribute('data-cat-id');
                 btn.innerHTML = favorites.has(catId) ? '❤️ Remover' : '⭐ Favoritar';
-                btn.setAttribute('aria-label', favorites.has(catId) 
-                    ? 'Remover dos favoritos' 
-                    : 'Adicionar aos favoritos');
             });
         }
 
@@ -381,7 +377,6 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', init);
-        document.addEventListener('DOMContentLoaded', loadFavorites);
     </script>
 </body>
 </html>

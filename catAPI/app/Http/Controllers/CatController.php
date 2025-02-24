@@ -3,87 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Favorite;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Favorite;
 
 class CatController extends Controller
 {
-    public function showFavorites()
-    {
-        return view('favorites');
-    }
-
-    public function getFavorites()
-    {
-        try {
-            $favorites = Auth::user()->favorites()
-                ->select('id', 'cat_api_id', 'cat_url', 'created_at')
-                ->get();
-
-            return response()->json([
-                'success' => true,
-                'data' => $favorites
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Erro ao carregar favoritos: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao carregar favoritos'
-            ], 500);
-        }
-    }
-
     public function favorite(Request $request)
     {
-        try {
-            $request->validate([
-                'cat_id' => 'required|string',
-                'cat_url' => 'required|url'
-            ]);
+        $request->validate([
+            'cat_id' => 'required|string',
+            'cat_url' => 'required|string',
+        ]);
 
-            Favorite::create([
-                'user_id' => Auth::id(),
-                'cat_api_id' => $request->cat_id,
-                'cat_url' => $request->cat_url
-            ]);
+        $favorite = Favorite::where('user_id', Auth::id())->where('cat_api_id', $request->cat_id)->first();
 
-            return response()->json([
-                'status' => 'added',
-                'message' => '⭐ Favorito adicionado com sucesso!',
-                'cat_id' => $request->cat_id
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Erro no favorito: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erro interno: ' . $e->getMessage()
-            ], 500);
+        if ($favorite) {
+            $favorite->delete();
+            return response()->json(['status' => 'removed']);
+        } else {
+            $favorite = new Favorite();
+            $favorite->user_id = Auth::id();
+            $favorite->cat_api_id = $request->cat_id;
+            $favorite->cat_url = $request->cat_url;
+            $favorite->save();
+            return response()->json(['status' => 'added']);
         }
     }
 
     public function deleteFavorite($catId)
     {
-        try {
-            $favorite = Favorite::where('user_id', Auth::id())
-                ->where('cat_api_id', $catId)
-                ->firstOrFail();
-
+        $favorite = Favorite::where('user_id', Auth::id())->where('cat_api_id', $catId)->first();
+        if ($favorite) {
             $favorite->delete();
-            
-            return response()->json([
-                'status' => 'removed',
-                'message' => '✅ Favorito removido!',
-                'cat_id' => $catId
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Erro ao remover favorito: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Favorito não encontrado ou já removido'
-            ], 404);
+            return response()->json(['status' => 'success']);
         }
+
+        return response()->json(['status' => 'error'], 404);
+    }
+
+    public function showFavorites()
+    {
+        $favorites = Favorite::where('user_id', Auth::id())->get();
+        return view('favorites', compact('favorites'));
+    }
+
+    public function getFavorites()
+    {
+        $favorites = Favorite::where('user_id', Auth::id())->get();
+        return response()->json(['data' => $favorites]);
     }
 }

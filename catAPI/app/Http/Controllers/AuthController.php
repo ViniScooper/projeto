@@ -60,6 +60,7 @@ class AuthController extends Controller
             'cpf' => 'required|string|max:14|unique:usuarios',
             'email' => 'required|string|email|max:255|unique:usuarios',
             'phone' => 'required|string|max:15',
+            'sexo' => 'required|string|in:masculino,feminino',
             'password' => [
                 'required',
                 'confirmed',
@@ -77,6 +78,7 @@ class AuthController extends Controller
             'cpf' => $request->cpf,
             'email' => $request->email,
             'phone' => $request->phone,
+            'sexo' => $request->sexo,
             'password' => Hash::make($request->password)
         ]);
 

@@ -33,14 +33,14 @@
             margin-bottom: 0.5rem;
             color: #2c3e50;
         }
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 1rem;
         }
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             border-color: #3498db;
             outline: none;
         }
@@ -102,6 +102,17 @@
                 <label for="phone">Telefone</label>
                 <input type="text" id="phone" name="phone" required>
                 @error('phone')
+                    <div>{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo" required>
+                    <option value="">Selecione</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                </select>
+                @error('sexo')
                     <div>{{ $message }}</div>
                 @enderror
             </div>
